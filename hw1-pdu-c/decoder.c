@@ -55,10 +55,6 @@ int main(int argc, char **argv) {
 void decode_raw_packet(uint8_t *packet, uint64_t packet_len){
 
     printf("Packet length = %ld bytes\n", packet_len);
-
-    //Everything we are doing starts with the ethernet PDU at the
-    //front.  The below code projects an ethernet_pdu structure 
-    //POINTER onto the front of the buffer so we can decode it.
     struct ether_pdu *p = (struct ether_pdu *)packet;
     uint16_t ft = ntohs(p->frame_type);
 
@@ -67,12 +63,7 @@ void decode_raw_packet(uint8_t *packet, uint64_t packet_len){
     switch(ft) {
         case ARP_PTYPE:
             printf("Packet type = ARP\n");
-
-            //Lets process the ARP packet, convert all of the network byte order
-            //fields to host machine byte order
             arp_packet_t *arp = process_arp(packet);
-
-            //Print the arp packet
             print_arp(arp);
             break;
         case IP4_PTYPE:
@@ -124,21 +115,13 @@ void decode_raw_packet(uint8_t *packet, uint64_t packet_len){
  *  converts all of the network byte order fields into host byte order.
  */
 arp_packet_t *process_arp(raw_packet_t raw_packet) {
-    
-    //TODO: Implement this function.  Convert raw_packet via
-    //type conversion to arp_packet_t and then convert the
-    //network byte order fields to host byte order fields using
-    //ntohs() and/or ntohl().  Return a pointer to an arp_packet_t
-    //You do not need to allocate any memory. 
 
+    // Perform necessary conversions from BE to LE.
     arp_packet_t *modPacket = (arp_packet_t *)raw_packet;
     modPacket->eth_hdr.frame_type = ntohs(modPacket->eth_hdr.frame_type);
     modPacket->arp_hdr.htype = ntohs(modPacket->arp_hdr.htype);
     modPacket->arp_hdr.ptype = ntohs(modPacket->arp_hdr.ptype);
     modPacket->arp_hdr.op = ntohs(modPacket->arp_hdr.op);
-
-    //remove this after you implement the logic, just here to make sure
-    //the program compiles
     return modPacket;
 }
 
@@ -148,10 +131,8 @@ arp_packet_t *process_arp(raw_packet_t raw_packet) {
  *  ARP_REQUEST or an ARP_RESPONSE
  */
 void print_arp(arp_packet_t *arp){
-//TODO:  take the arp parameter, of type arp_packet_t and print it out
-//nicely.  My output looks like below, but you dont have to make it look
-//exactly like this, just something nice. 
 /*
+Mirrored my implementation off of this example: 
 Packet length = 60 bytes
 Detected raw frame type from ethernet header: 0x806
 Packet type = ARP
@@ -166,10 +147,6 @@ ARP PACKET DETAILS
      tpa:       192.168.50.99 
      tha:       00:00:00:00:00:00 
  */
-//  printf("remove this, for now just printing hello from ARP\n");
-//  printf("Packett length = %zu bytes\n",sizeof(arp->arp_hdr)+sizeof(arp->eth_hdr));
-//  printf("Detected raw frame type from ethernet header: 0x%04x\n",arp->eth_hdr.frame_type);
-//  printf("Packet Type = ARP\n");
  printf("ARP PACKET DETAILS\n");
  printf("\thtype:\t0x%04x\n",arp->arp_hdr.htype);
  printf("\tptype:\t0x%04x\n",arp->arp_hdr.ptype);
@@ -216,13 +193,6 @@ ARP PACKET DETAILS
  *  IP PDU is set to ICMP_PTYPE to do this.
  */
 bool check_ip_for_icmp(ip_packet_t *ip){
-    //TODO:  This function inspects the provided IP packet and extracts
-    //the protocol.  If the protocol is ICMP_PTYPE then we return true
-    //otherwise we return false.  The function header gives some more
-    //hints.
-    
-    //remove this after you implement the logic, just here to make sure
-    //the program compiles
     if (ip->ip_hdr.protocol == ICMP_PTYPE) {
         return true;
     }
@@ -237,15 +207,7 @@ bool check_ip_for_icmp(ip_packet_t *ip){
  *  network to host byte order. 
  */
 icmp_packet_t *process_icmp(ip_packet_t *ip){
-    //TODO: Implement this function.  Convert ip_packet via
-    //type conversion to icmp_packet_t and then convert the
-    //network byte order fields to host byte order fields using
-    //ntohs() and/or ntohl().  Return a pointer to an icmp_packet_t
-    //You do not need to allocate any memory. 
-
-    //remove this after you implement the logic, just here to make sure
-    //the program compiles
-
+    // Perform necessary conversions from BE to LE.
     icmp_packet_t *modICMP = (icmp_packet_t *)ip;
     modICMP->ip.eth_hdr.frame_type = ntohs(modICMP->ip.eth_hdr.frame_type);
     modICMP->ip.ip_hdr.header_checksum = ntohs(modICMP->ip.ip_hdr.header_checksum);
@@ -263,14 +225,6 @@ icmp_packet_t *process_icmp(ip_packet_t *ip){
  *  still ICMP but not of type ICMP_ECHO. 
  */
 bool is_icmp_echo(icmp_packet_t *icmp) {
-    //TODO:  This function inspects the provided ICMP and checks
-    //its type.  If the type is ICMP_ECHO_REQUEST or ICMP_ECHO_RESPONSE 
-    //then reutrn true otherwise we return false.  The function header 
-    //gives some more hints.  The constants are defined in packet.h so take
-    //a look there as well.
-    
-    //remove this after you implement the logic, just here to make sure
-    //the program compiles
     if (icmp->icmp_hdr.type == ICMP_ECHO_REQUEST || icmp->icmp_hdr.type == ICMP_ECHO_RESPONSE) {
         return true;
     }
@@ -284,11 +238,7 @@ bool is_icmp_echo(icmp_packet_t *icmp) {
  *  convert from network to host byte order.
  */
 icmp_echo_packet_t *process_icmp_echo(icmp_packet_t *icmp){
-    //TODO: Implement this function.  Convert icmp_packet_t via
-    //type conversion to icmp_echo_packet_t and then convert the
-    //network byte order fields to host byte order fields using
-    //ntohs() and/or ntohl().  Return a pointer to an icmp_echo_packet_t
-    //You do not need to allocate any memory. 
+    // Perform necessary conversions from BE to LE.
     icmp_echo_packet_t * modEchoPacket = (icmp_echo_packet_t *)icmp;
     modEchoPacket->ip.ip_hdr.header_checksum = ntohs(modEchoPacket->ip.ip_hdr.header_checksum);
     modEchoPacket->ip.ip_hdr.identification = ntohs(modEchoPacket->ip.ip_hdr.identification);
@@ -298,9 +248,6 @@ icmp_echo_packet_t *process_icmp_echo(icmp_packet_t *icmp){
     modEchoPacket->icmp_echo_hdr.timestamp = ntohl(modEchoPacket->icmp_echo_hdr.timestamp);
     modEchoPacket->icmp_echo_hdr.timestamp_ms = ntohl(modEchoPacket->icmp_echo_hdr.timestamp_ms);
 
-
-    //remove this after you implement the logic, just here to make sure
-    //the program compiles
     return modEchoPacket;
 }
 
@@ -315,9 +262,7 @@ icmp_echo_packet_t *process_icmp_echo(icmp_packet_t *icmp){
  *  gives the size of the payload buffer.
  */
 void print_icmp_echo(icmp_echo_packet_t *icmp_packet){
-//TODO:  take the icmp_packet parameter, of type icmp_echo_packet_t 
-//and print it out nicely.  My output looks like below, but you dont 
-//have to make it look exactly like this, just something nice. 
+// Mirrored my solution off of this example below. 
 /*
 Packet length = 98 bytes
 Detected raw frame type from ethernet header: 0x800
@@ -332,20 +277,6 @@ ICMP PACKET DETAILS
      payload:   48 bytes 
      ECHO Timestamp: TS = 2023-09-22 21:06:54.57804
  */
-    
-    //remove this, just a placeholder
-    // printf("This is where you place your logic to print your ICMP echo PDU header\n");
-
-    // //after you print the echo header, print the payload.
-    // printf("Packet length: %u bytes\n",99999);
-    // printf("Detected raw frame type from ethernet header: 0x%04x\n",icmp_packet->ip.eth_hdr.frame_type);
-    // if (icmp_packet->ip.eth_hdr.frame_type == IP4_PTYPE) {
-    //     printf("Frame Type = IPv4\n");
-    // }
-    // else {
-    //     printf("Frame Type is Unknown. Aborting.\n");
-    //     return;
-    // }
 
     printf("ICMP Type %u\n",icmp_packet->icmp_echo_hdr.icmp_hdr.type);
     printf("ICMP PACKET DETAILS\n");
